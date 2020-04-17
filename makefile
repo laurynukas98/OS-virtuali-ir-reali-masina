@@ -1,0 +1,22 @@
+MAIN_FILE = main
+
+CSHARP_SOURCE_FILES = $(wildcard src/*.cs src/*/*.cs )
+
+CSHARP_FLAGS = -out:$(EXECUTABLE)
+
+CSHARP_COMPILER = mcs
+
+EXECUTABLE = $(MAIN_FILE).exe
+
+RM_CMD = -rm -f $(EXECUTABLE)
+
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(CSHARP_SOURCE_FILES)
+	@ $(CSHARP_COMPILER) $(CSHARP_SOURCE_FILES) $(CSHARP_FLAGS)
+
+run: all
+	./$(EXECUTABLE)
+
+clear:
+	@ $(RM_CMD)

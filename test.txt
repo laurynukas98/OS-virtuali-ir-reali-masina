@@ -1,0 +1,11 @@
+$DATA
+DW 50 
+DW 100
+$START
+LB 1
+SAI
+CEN
+JC 9
+JP 4
+PI
+$END

@@ -1,0 +1,22 @@
+$DATA
+DW 0 
+DW 1
+DW 0
+DW 20
+DW 1
+$START
+LR 1
+AD 2
+LB 2
+SS 1
+SR 2
+PA
+LR 3
+LB 4
+CEN
+JC 20
+LB 5
+ADD
+SR 3
+JP 6
+$END
