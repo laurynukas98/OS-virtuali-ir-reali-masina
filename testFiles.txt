@@ -1,0 +1,36 @@
+$DATA
+DW 2
+DB Duom
+DB .bin
+DW 3
+DB Duom
+DB COPY
+DB .bin
+DW 0
+DW 0
+$START
+FO01
+SR08
+FN04
+SR09
+FEND
+JC17
+LR08
+FR30
+LR09
+FP30
+FEND
+JC17
+JP10
+LR08
+FRCL
+LR09
+FNCL
+$END
+2 - Failas skaitymui
+5 - Faila sukursime ir nukopijuosis is praeito
+9 - Failo read deskriptorius
+10 - Failo write deskriptorius
+11 - kiek skaityti zodziu
+13 - aditaro file read
+...
