@@ -4,23 +4,58 @@ class Word{
     private const int SIZE = 4;
     private byte[] data;
 
+    public bool isEqual(Word word){
+        int countEqual = 0;
+        for (int i = 0; i < SIZE; i++)
+            if (this.data[i] == word.getByte(i)){
+                countEqual++;
+            }
+        return countEqual==SIZE?true:false;
+    }
+
     public byte getByte(int i){
         return data[i];
+    }
+
+    public string getString(){
+        return String.Format("{0}{1}{2}{3}", (char)data[0], (char)data[1], (char)data[2], (char)data[3]);
     }
     
     public void setByte(int i, byte b){
         this.data[i] = b;
     }
+
+    public static int convertChar(byte t){
+        if(t-65 >=0){
+            return 10+(t-65);
+        }
+        return t-48;
+    }
+
+    public static byte convertInt(int t){
+        if(t>=10){
+            return (byte)(65+t%10);
+        }
+        return (byte)(48+t);
+    }
     
     public void setInt(int value){
         data = new byte[SIZE];
-        data[0] = (byte)(value/Math.Pow(16,6));
-        value -= (int)(data[0]*Math.Pow(16,6));
-        data[1] = (byte)(value/Math.Pow(16,4));
-        value -= (int)(data[1]*Math.Pow(16,4));
-        data[2] = (byte)(value/Math.Pow(16,2));
-        value -= (int)(data[1]*Math.Pow(16,2));
-        data[3] = (byte)value;
+        data[0] = convertInt((int)(value/Math.Pow(16,3)));
+        value -= (int)(convertChar(data[0])*Math.Pow(16,3));
+        data[1] = convertInt((int)(value/Math.Pow(16,2)));
+        value -= (int)(convertChar(data[1])*Math.Pow(16,2));
+        data[2] = convertInt((int)(value/Math.Pow(16,1)));
+        value -= (int)(convertChar(data[2])*Math.Pow(16,1));
+        data[3] = convertInt(value);
+    }
+
+    public void setString(string value){
+        data = new byte[SIZE];
+        data[0] = (byte)value[0];
+        data[1] = (byte)value[1];
+        data[2] = (byte)value[2];
+        data[3] = (byte)value[3];
     }
 
     public void setBytes(byte[] value){
@@ -28,7 +63,11 @@ class Word{
     }
 
     public static int toInt(Word word){
-        return (int)(word.data[0]*Math.Pow(16,6)+word.data[1]*Math.Pow(16,4)+word.data[2]*Math.Pow(16,2)+word.data[3]);
+        return (int)(convertChar(word.data[0])*Math.Pow(16,3)+convertChar(word.data[1])*Math.Pow(16,2)+convertChar(word.data[2])*Math.Pow(16,1)+convertChar(word.data[3]));
+    }
+
+    public static string toString(Word word){
+        return new string(new char[]{(char)word.getByte(0),(char)word.getByte(1),(char)word.getByte(2),(char)word.getByte(3)});
     }
 
     public static Word toWord(int value){
@@ -37,7 +76,11 @@ class Word{
     }
 
     public void print(){
-        Console.Write("{0:X} {1:X} {2:X} {3:X}\n", data[0], data[1], data[2], data[3]);
+        Console.Write("{0,2:X} {1,2:X} {2,2:X} {3,2:X}", data[0], data[1], data[2], data[3]);
+    }
+
+    public void printC(){
+        Console.Write("{0}{1}{2}{3}", (char)data[0], (char)data[1], (char)data[2], (char)data[3]);
     }
 
     public Word(){

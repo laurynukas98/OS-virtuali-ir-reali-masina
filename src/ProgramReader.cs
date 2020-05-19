@@ -14,17 +14,24 @@ class ProgramReader{
         DB t.tx
         DB tnnn  //1 baitas nurodo string ilgi(max 15), toliau - kiekvienas simbolis, po 1 baita.
         $START //nuo 5 zodzio atmintyje
-        LR 01 //i registra RA ideda reiksme 50 (taip pat uzema 1 zodi?)
-        LB 01 //i registra RB ideda reiksme 50
-        ADD //sudeda RA ir RB, ats: RA (uzema 1 zodi?)
-        SR 01 //issaugo RA reiksme
-        FO 02 //atidaro "test.txt" faila, deskriptorius RA
-        LB 01 //registro RB reiksme - 100.
+        LR01 //i registra RA ideda reiksme 50 (taip pat uzema 1 zodi?)
+        LB01 //i registra RB ideda reiksme 50
+        ADD_ //sudeda RA ir RB, ats: RA (uzema 1 zodi?)
+        SR01 //issaugo RA reiksme
+        FO02 //atidaro "test.txt" faila, deskriptorius RA
+        LB01 //registro RB reiksme - 100.
         FPUT //i faila iraso RB reiksme.
         FRCL //uzdaro failo deskriptoriu.
         $END //HALT
         //Toliau failas nera skaitomas
     */
+
+    public byte convertInt(int t){
+        if(t>=10){
+            return (byte)(65+t%10);
+        }
+        return (byte)(48+t);
+    }
 
     private bool read(){
         StreamReader sr = new StreamReader(fileName);
@@ -32,38 +39,39 @@ class ProgramReader{
         bool reading = false;
         bool foundEnd = false;
         try{
-        while (!sr.EndOfStream){
-            string[] t = (sr.ReadLine()).Split(' ');
-            if (t[0] == "$DATA" && reading != true){
-                reading = true;
+            while (!sr.EndOfStream){
+                string[] t = (sr.ReadLine()).Split(' ');
+                //Console.WriteLine(t[0]);
+                if (t[0] == "$DATA" && reading != true){
+                    reading = true;
+                }
+                else if (t[0] == "$START" && reading){
+                    memory[0] = new Word(new byte[]{Convert.ToByte('J'),Convert.ToByte('P'),convertInt((arrow/16)),convertInt((arrow-(arrow/16)*16))});
+                    continue;
+                }
+                else if (t[0] == "$END" && reading){
+                    memory[arrow] = new Word("HALT");
+                    foundEnd = true;
+                    break;
+                }
+                else if (t[0] == "DB" && reading){
+                    memory[arrow] = new Word(t[1]);
+                }
+                else if (t[0] == "DW" && reading){
+                    memory[arrow] = new Word(int.Parse(t[1]));
+                }
+                else if (reading){
+                    memory[arrow] = new Word(new Byte[]{(byte)t[0][0],(byte)t[0][1],(byte)t[0][2],(byte)t[0][3]});
+                }
+                if (reading)
+                    arrow++;
             }
-            else if (t[0] == "$START" && reading){
-                memory[0] = new Word(new byte[]{0x40,(byte)arrow,0,0});
-                continue;
-            }
-            else if (t[0] == "$END" && reading){
-                memory[arrow] = new Word(0);
-                foundEnd = true;
-                break;
-            }
-            else if ( t[0] == "DB" && reading){
-                memory[arrow] = new Word(t[1]);
-            }
-            else if (t[0] == "DW" && reading){
-                memory[arrow] = new Word(Int32.Parse(t[1]));
-            }
-            else if (reading){
-                int number = (int)Enum.Parse(typeof(Commands), t[0]);
-                memory[arrow] = new Word(new Byte[]{(byte)number,t.Length>1?(byte)Int32.Parse(t[1]):(byte)0,0,0});
-            }
-            if (reading)
-                arrow++;
-        }
-        if (!foundEnd)
-            pass = false;
+            if (!foundEnd)
+                pass = false;
         }catch(Exception e){
             Console.WriteLine(e);
         }
+        sr.Close();
         return pass;
     }
 
@@ -76,15 +84,14 @@ class ProgramReader{
             if (memory[i]!=null)
                 memory[i].print();
             else
-                break;
+                new Word(0).print();
         }
     }
 
     public ProgramReader(string fileName, int maxSize){
         this.fileName = fileName;
-        this.maxSize = maxSize;
+        this.maxSize = 16*16;
         memory = new Word[maxSize];
         pass = this.read();
-        //this.print();
     }
 }
