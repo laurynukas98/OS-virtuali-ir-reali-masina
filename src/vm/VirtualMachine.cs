@@ -39,7 +39,7 @@ namespace VM{
         private bool debug = false;
         
         public void update(){
-            running = cpu.update();
+            running = cpu.update(this);
             C = cpu.getC();
             IC = cpu.getIC();
             RA = cpu.getRA();
@@ -54,11 +54,16 @@ namespace VM{
                     Console.Clear();
                 }
                 cpu.execute(memory.read(IC));
+
                 update();
             }
         }
 
         public void print(){
+            C = cpu.getC();
+            IC = cpu.getIC();
+            RA = cpu.getRA();
+            RB = cpu.getRB();
             memory.print();
             cpu.printReg();
             Console.WriteLine("Virtual Machine Registers:");

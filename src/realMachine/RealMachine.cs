@@ -53,7 +53,7 @@ namespace realMachine{
         public void allocateMemoryVM(int pagingIndex){
             for (int i = 0; i < 16; i++){//paging cells
                 bool found = false;
-                for (int o = 0; o <= 16*maxBlockSize; o++){
+                for (int o = maxBlockSize-1; o >= 0; o--){
                     if (isFreeBlock(o)){
                         allocateBlock(o);
                         memory[pagingIndex*16+i] = new Word(o);
@@ -61,6 +61,14 @@ namespace realMachine{
                         break;
                     }
                 }
+                /*for (int o = 0; o <= 16*maxBlockSize; o++){
+                    if (isFreeBlock(o)){
+                        allocateBlock(o);
+                        memory[pagingIndex*16+i] = new Word(o);
+                        found = true;
+                        break;
+                    }
+                }*/
                 if (!found){
                     Console.Write("ERROR!, NO MEMORY LEFT!");
                     break;
@@ -87,14 +95,24 @@ namespace realMachine{
 
         public int newPaging(Word[] program){
             int pagingIndex = -1;
-            for (int i = 0; i < 16*16; i++){
+            Random rnd = new Random();
+            for (int i = 0; i < 5; i++){
+                int t = rnd.Next(0,16*16/2);
+                if (isFreeBlock(t)){
+                    allocateBlock(t);
+                    pagingIndex = t;
+                    allocateMemoryVM(pagingIndex);
+                    break;
+                }
+            }
+            /*for (int i = 0; i < 16*16; i++){
                 if (isFreeBlock(i)){
                     allocateBlock(i);
                     pagingIndex = i;
                     allocateMemoryVM(pagingIndex);
                     break;
                 }
-            }
+            }*/
             if (pagingIndex >= 0){
                 cpu.setPTR(new Word(new Byte[]{(byte)'0',(byte)'F',(byte)Word.convertInt(pagingIndex/16),(byte)Word.convertInt(pagingIndex%16)}));
                 for (int i = 0; i < 16*16; i++){
@@ -255,7 +273,7 @@ namespace realMachine{
         }
 
         public int openReadFile(string path){
-            int t = filesRead.Count;
+            int t = filesRead.Count+11;
             if (!File.Exists(path)){
                 return -1;
             }
@@ -278,7 +296,7 @@ namespace realMachine{
         }
 
         public int openWriteFile(string path){
-            int t = filesWrite.Count;
+            int t = filesWrite.Count+20;
             filesWrite.Add( t, new StreamWriter(path));
             return t;
         }
@@ -471,11 +489,20 @@ namespace realMachine{
             }
         }
 
-        public bool update(){
+        public bool update(VirtualMachine vm){
             //TI PI SI
             bool running = true;
+            bool g = false;
             MODE = 1;
             if (SI > 0){
+                g = true;
+                if (debug){
+                    IC--;
+                    vm.print();
+                    Console.ReadKey();
+                    Console.Clear();
+                    IC++;
+                }
                 if (SI == 1){//GDxyVeikia
                     int countS = 0;
                     int countB = 0;
@@ -595,11 +622,12 @@ namespace realMachine{
                     }
                 }
                 else if (SI == 16){//FEND
-                    C = hardDrive.isEndOfRead(RA);
+                    C = hardDrive.isEndOfRead((int)RA);
                 }
                 SI = 0;
             }
             if (PI > 0){
+                g = true;
                 if (PI == 1){
                     Console.WriteLine("ERROR! Wrong adress!");
                 }
@@ -633,10 +661,20 @@ namespace realMachine{
                 running = false;
             }
             if (TI == 0){
+                g = true;
                 Console.WriteLine("ERROR! Timer interruption!");
                 running = false;
             }
             MODE = 0;
+            if (g == true){
+                if (debug){
+                    IC--;
+                    vm.print();
+                    Console.ReadKey();
+                    Console.Clear();
+                    IC++;
+                }
+            }
             return running;
         }
 
